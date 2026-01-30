@@ -11,6 +11,7 @@ Personal trading dashboard for MetaTrader 5 with FastAPI backend and Next.js fro
 - **Magic Groups**: Group magics for aggregated statistics
 - **Balance/Equity Charts**: Timeline visualization of account performance
 - **Deals History**: Detailed view of closed positions
+- **Chart Editor**: Bulk editing of EA parameters in .chr files
 
 ## Architecture
 
@@ -24,7 +25,8 @@ MT5_Trading_Dashboard/
 │   ├── services/            # Business logic layer
 │   │   ├── account_service.py   # Account management
 │   │   ├── sync_service.py      # MT5 sync operations
-│   │   └── group_service.py     # Magic groups management
+│   │   ├── group_service.py     # Magic groups management
+│   │   └── chart_service.py     # Chart file (.chr) editing
 │   ├── db_sa/               # SQLAlchemy ORM
 │   │   ├── models.py        # Database models
 │   │   ├── session.py       # Session management
@@ -147,6 +149,12 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 | GET | /deals | Get deals history |
 | POST | /sync/open | Sync open positions |
 | POST | /sync/history | Sync deals history |
+| GET | /charts/config | Chart editor configuration |
+| PUT | /charts/config | Update charts folder path |
+| GET | /charts/folders | List profile folders |
+| GET | /charts/sections | List editing sections |
+| POST | /charts/validate | Validate section |
+| POST | /charts/write/{id} | Write changes to file |
 
 ## Key Classes
 

@@ -692,6 +692,10 @@ export default function Home() {
     window.open("/balance-chart", "_blank");
   };
 
+  const handleChartsClick = () => {
+    window.open("/create-charts", "_blank");
+  };
+
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
   };
@@ -900,6 +904,7 @@ export default function Home() {
             onGroupsClick={handleGroupsClick}
             onDealsClick={handleDealsClick}
             onBalanceChartClick={handleBalanceChartClick}
+            onChartsClick={handleChartsClick}
           />
         </div>
 

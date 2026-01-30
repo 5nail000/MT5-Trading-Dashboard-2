@@ -18,6 +18,7 @@ from ..readmodels.dashboard_queries import (
 )
 from ..security.ip_filter import IPFilterMiddleware
 from ..services import AccountService, SyncService, GroupService
+from ..services.chart_service import ChartService
 
 logger = get_logger()
 
@@ -116,6 +117,32 @@ class GroupRenameRequest(BaseModel):
 class GroupAssignmentsRequest(BaseModel):
     account_id: str
     magic_ids: List[int]
+
+
+class ChartConfigRequest(BaseModel):
+    charts_path: str
+
+
+class ChartSectionCreateRequest(BaseModel):
+    folder_name: str
+    validation_line1: str
+    validation_line2: Optional[str] = None
+    param_key: str
+    param_value: str
+
+
+class ChartSectionUpdateRequest(BaseModel):
+    validation_line1: Optional[str] = None
+    validation_line2: Optional[str] = None
+    param_key: Optional[str] = None
+    param_value: Optional[str] = None
+
+
+class ChartValidateRequest(BaseModel):
+    folder_name: str
+    validation_line1: str
+    validation_line2: Optional[str] = None
+    param_key: str
 
 
 # ============== Health & Accounts ==============
@@ -294,3 +321,91 @@ async def sync_history(payload: HistorySyncRequest):
         raise HTTPException(status_code=400, detail=result.get("detail"))
     
     return result
+
+
+# ============== Chart Editor ==============
+
+@app.get("/charts/config")
+def get_charts_config():
+    """Get chart editor configuration."""
+    return ChartService.get_config()
+
+
+@app.put("/charts/config")
+def update_charts_config(payload: ChartConfigRequest):
+    """Update charts folder path."""
+    return ChartService.set_charts_path(payload.charts_path)
+
+
+@app.get("/charts/folders")
+def list_chart_folders():
+    """List folders in charts directory."""
+    return ChartService.list_folders()
+
+
+@app.get("/charts/sections")
+def list_chart_sections(folder_name: Optional[str] = None):
+    """List chart sections, optionally filtered by folder."""
+    return ChartService.list_sections(folder_name)
+
+
+@app.post("/charts/sections")
+def create_chart_section(payload: ChartSectionCreateRequest):
+    """Create a new chart section."""
+    return ChartService.create_section(
+        folder_name=payload.folder_name,
+        validation_line1=payload.validation_line1,
+        validation_line2=payload.validation_line2,
+        param_key=payload.param_key,
+        param_value=payload.param_value,
+    )
+
+
+@app.put("/charts/sections/{section_id}")
+def update_chart_section(section_id: int, payload: ChartSectionUpdateRequest):
+    """Update a chart section."""
+    result = ChartService.update_section(
+        section_id=section_id,
+        validation_line1=payload.validation_line1,
+        validation_line2=payload.validation_line2,
+        param_key=payload.param_key,
+        param_value=payload.param_value,
+    )
+    if not result:
+        raise HTTPException(status_code=404, detail="Section not found")
+    return result
+
+
+@app.delete("/charts/sections/{section_id}")
+def delete_chart_section(section_id: int):
+    """Delete a chart section."""
+    success = ChartService.delete_section(section_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Section not found")
+    return {"status": "ok"}
+
+
+@app.post("/charts/validate")
+def validate_chart_section(payload: ChartValidateRequest):
+    """Validate section against chart files."""
+    return ChartService.validate_section(
+        folder_name=payload.folder_name,
+        validation_line1=payload.validation_line1,
+        validation_line2=payload.validation_line2,
+        param_key=payload.param_key,
+    )
+
+
+@app.post("/charts/write/{section_id}")
+def write_chart_section(section_id: int):
+    """Write section parameter value to the matched chart file."""
+    result = ChartService.write_section(section_id)
+    if result.get("status") == "error":
+        raise HTTPException(status_code=400, detail=result.get("message"))
+    return result
+
+
+@app.post("/charts/write-folder/{folder_name}")
+def write_folder_sections(folder_name: str):
+    """Write all sections for a folder."""
+    return ChartService.write_folder_sections(folder_name)

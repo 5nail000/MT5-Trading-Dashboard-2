@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-01-30
+
+### Added
+- **Create Charts** - новая страница для редактирования параметров советников в .chr файлах MT5
+  - Панели по папкам профилей (например Real_Trade_last, Real_Trade_Lord)
+  - Секции для изменения параметров советников (Lot, SL, TP и т.д.)
+  - Двухуровневая валидация файлов (Validation Line 1 + 2 для точного поиска)
+  - Автоматическое определение файла и текущего значения параметра
+  - Цветовая индикация: зелёный (найдено), жёлтый (значение уже соответствует), красный (не найдено)
+  - Кнопка Write для записи изменений в .chr файлы (UCS-2 LE кодировка)
+  - Автосохранение состояния в localStorage
+  - Компактный дизайн для отображения множества секций
+  - Автозамена запятой на точку в числовых значениях (0,02 → 0.02)
+
+### Backend
+- Новые модели БД: `ChartConfig`, `ChartSection`
+- Новый сервис: `chart_service.py` для работы с .chr файлами
+- Новые API эндпоинты:
+  - `GET/PUT /charts/config` - конфигурация пути к папке charts
+  - `GET /charts/folders` - список папок профилей
+  - `GET/POST/PUT/DELETE /charts/sections` - CRUD секций
+  - `POST /charts/validate` - валидация секции
+  - `POST /charts/write/{id}` - запись секции в файл
+  - `POST /charts/write-folder/{folder}` - запись всех секций папки
+
+### Frontend
+- Новая кнопка "Create Charts" в панели Actions (SidePanel)
+- Новая страница `/create-charts` с компактным редактором
+
+---
+
 ## [1.0.0] - 2026-01-29
 
 ### Added

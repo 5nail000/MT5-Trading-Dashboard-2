@@ -215,3 +215,26 @@ class TickBatch(Base):
     tick_count = Column(Integer, nullable=True)
 
     __table_args__ = (Index("ix_tick_batches_server_symbol", "server", "symbol"),)
+
+
+class ChartConfig(Base):
+    """Global configuration for chart editor."""
+    __tablename__ = "chart_configs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    charts_path = Column(String, nullable=False)  # path to charts folder
+
+
+class ChartSection(Base):
+    """Section for editing chart parameters."""
+    __tablename__ = "chart_sections"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    folder_name = Column(String, nullable=False)  # e.g. "Real_Trade_last"
+    validation_line1 = Column(String, nullable=False)  # e.g. "path=Experts\\Market\\GoldTick.ex5"
+    validation_line2 = Column(String, nullable=True)  # optional second validation
+    param_key = Column(String, nullable=False)  # e.g. "Lot="
+    param_value = Column(String, nullable=False)  # e.g. "0.2"
+    order_index = Column(Integer, default=0)
+
+    __table_args__ = (Index("ix_chart_sections_folder", "folder_name"),)

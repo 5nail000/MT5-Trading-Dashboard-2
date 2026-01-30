@@ -39,6 +39,7 @@ Services:
 - `AccountService` - Account CRUD, credentials management
 - `SyncService` - MT5 data synchronization (async with ThreadPoolExecutor)
 - `GroupService` - Magic groups and labels
+- `ChartService` - Chart file (.chr) editing for EA parameters
 
 ### CQRS (Light)
 - **Commands**: Services handle writes
@@ -101,10 +102,12 @@ MT5 uses "magic numbers" to identify trading strategies/EAs. Dashboard allows:
 | File | Purpose |
 |------|---------|
 | `src/services/sync_service.py` | Async MT5 sync operations |
+| `src/services/chart_service.py` | Chart file (.chr) editing operations |
 | `src/mt5/mt5_client.py` | MT5Connection singleton, data fetching |
-| `src/db_sa/models.py` | SQLAlchemy models (Account, Deal, Magic, etc.) |
+| `src/db_sa/models.py` | SQLAlchemy models (Account, Deal, Magic, ChartSection, etc.) |
 | `src/readmodels/dashboard_queries.py` | Complex aggregation queries |
 | `dashboard-next/src/app/page.tsx` | Main dashboard page (large file) |
+| `dashboard-next/src/app/create-charts/page.tsx` | Chart parameter editor page |
 | `dashboard-next/src/lib/api.ts` | API client functions |
 
 ### Frontend Components
@@ -173,4 +176,6 @@ magics (account_id, id PK, label)
 magic_groups (id PK, account_id, name, label2, font_color, fill_color)
 magic_group_assignments (account_id, group_id, magic_id)
 open_positions (account_id, ticket_id PK, magic, profit, ...)
+chart_configs (id PK, charts_path)
+chart_sections (id PK, folder_name, validation_line1, validation_line2, param_key, param_value, order_index)
 ```
