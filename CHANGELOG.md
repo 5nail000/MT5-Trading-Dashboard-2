@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-04
+
+### Added
+- **Compare Accounts** - новая страница для сравнения торговой истории между двумя аккаунтами
+  - Выбор двух аккаунтов для сравнения
+  - Фильтр периода (Today, 3 Days, Week, Month, Year)
+  - Выбор magic для сравнения (показывает только общие магики между аккаунтами)
+  - Настраиваемая погрешность времени для сопоставления сделок (по умолчанию 1 сек)
+  - Таблица с параллельным отображением данных обоих аккаунтов
+  - Цветовое выделение несопоставленных сделок (оранжевый - только в acc1, красный - только в acc2)
+  - Summary со статистикой: matched, account1_only, account2_only, P/L по каждому аккаунту
+
+### Backend
+- Новая функция `get_compared_deals()` в `dashboard_queries.py` для сопоставления сделок по `entry_time`
+- Новый API эндпоинт: `GET /compare-deals` с параметрами:
+  - `account_id_1`, `account_id_2` - ID аккаунтов
+  - `magic` - номер магика
+  - `from_date`, `to_date` - период
+  - `tolerance_seconds` - погрешность времени (default: 1)
+
+### Frontend
+- Новая кнопка "Compare Accounts" в панели Actions (SidePanel)
+- Новая страница `/compare` с интерфейсом сравнения
+- Новые TypeScript типы: `CompareDeal`, `CompareDealPair`, `CompareSummary`, `CompareResult`
+
+---
+
 ## [1.1.0] - 2026-01-30
 
 ### Added

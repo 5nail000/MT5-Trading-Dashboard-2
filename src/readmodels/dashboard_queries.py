@@ -1,7 +1,7 @@
 """Aggregated queries for dashboard UI."""
 
-from datetime import datetime
-from typing import Dict, Any, List
+from datetime import datetime, timedelta
+from typing import Dict, Any, List, Optional
 
 from sqlalchemy import func
 
@@ -213,3 +213,140 @@ def get_deals(account_id: str, from_dt: datetime, to_dt: datetime) -> List[Dict[
             }
         )
     return result
+
+
+def _deal_to_dict(deal: Deal) -> Dict[str, Any]:
+    """Convert Deal model to dictionary for comparison API."""
+    return {
+        "position_id": deal.position_id,
+        "symbol": deal.symbol,
+        "direction": deal.direction or "buy",
+        "volume": deal.volume or 0.0,
+        "entry_time": deal.entry_time.isoformat() if deal.entry_time else None,
+        "entry_price": deal.entry_price,
+        "exit_time": deal.exit_time.isoformat() if deal.exit_time else None,
+        "exit_price": deal.exit_price,
+        "profit": deal.profit or 0.0,
+    }
+
+
+def get_compared_deals(
+    account_id_1: str,
+    account_id_2: str,
+    magic: int,
+    from_dt: datetime,
+    to_dt: datetime,
+    tolerance_seconds: int = 1
+) -> Dict[str, Any]:
+    """
+    Compare deals between two accounts by matching entry_time within tolerance.
+    
+    Returns pairs of deals and summary statistics.
+    """
+    with SessionLocal() as session:
+        # Get deals for account 1
+        deals1 = (
+            session.query(Deal)
+            .filter(
+                Deal.account_id == account_id_1,
+                Deal.magic == magic,
+                Deal.is_closed.is_(True),
+                Deal.entry_time.isnot(None),
+                Deal.exit_time.isnot(None),
+                Deal.exit_time >= from_dt,
+                Deal.exit_time <= to_dt,
+            )
+            .order_by(Deal.entry_time)
+            .all()
+        )
+        
+        # Get deals for account 2
+        deals2 = (
+            session.query(Deal)
+            .filter(
+                Deal.account_id == account_id_2,
+                Deal.magic == magic,
+                Deal.is_closed.is_(True),
+                Deal.entry_time.isnot(None),
+                Deal.exit_time.isnot(None),
+                Deal.exit_time >= from_dt,
+                Deal.exit_time <= to_dt,
+            )
+            .order_by(Deal.entry_time)
+            .all()
+        )
+    
+    tolerance = timedelta(seconds=tolerance_seconds)
+    pairs: List[Dict[str, Any]] = []
+    matched_count = 0
+    account1_only = 0
+    account2_only = 0
+    total_profit1 = 0.0
+    total_profit2 = 0.0
+    
+    # Track which deals from account2 have been matched
+    matched_deals2_indices: set = set()
+    
+    # Match deals from account1 to account2
+    for deal1 in deals1:
+        matched = False
+        deal1_entry = deal1.entry_time
+        
+        for idx, deal2 in enumerate(deals2):
+            if idx in matched_deals2_indices:
+                continue
+            
+            deal2_entry = deal2.entry_time
+            time_diff = abs((deal1_entry - deal2_entry).total_seconds())
+            
+            if time_diff <= tolerance_seconds:
+                # Match found
+                pairs.append({
+                    "entry_time": deal1_entry.isoformat(),
+                    "symbol": deal1.symbol,
+                    "deal1": _deal_to_dict(deal1),
+                    "deal2": _deal_to_dict(deal2),
+                })
+                matched_deals2_indices.add(idx)
+                matched_count += 1
+                total_profit1 += deal1.profit or 0.0
+                total_profit2 += deal2.profit or 0.0
+                matched = True
+                break
+        
+        if not matched:
+            # Deal only in account1
+            pairs.append({
+                "entry_time": deal1_entry.isoformat(),
+                "symbol": deal1.symbol,
+                "deal1": _deal_to_dict(deal1),
+                "deal2": None,
+            })
+            account1_only += 1
+            total_profit1 += deal1.profit or 0.0
+    
+    # Add unmatched deals from account2
+    for idx, deal2 in enumerate(deals2):
+        if idx not in matched_deals2_indices:
+            pairs.append({
+                "entry_time": deal2.entry_time.isoformat(),
+                "symbol": deal2.symbol,
+                "deal1": None,
+                "deal2": _deal_to_dict(deal2),
+            })
+            account2_only += 1
+            total_profit2 += deal2.profit or 0.0
+    
+    # Sort pairs by entry_time
+    pairs.sort(key=lambda p: p["entry_time"])
+    
+    return {
+        "pairs": pairs,
+        "summary": {
+            "matched": matched_count,
+            "account1_only": account1_only,
+            "account2_only": account2_only,
+            "total_profit1": round(total_profit1, 2),
+            "total_profit2": round(total_profit2, 2),
+        },
+    }

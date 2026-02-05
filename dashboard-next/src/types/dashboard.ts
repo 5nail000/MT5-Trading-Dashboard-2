@@ -83,3 +83,35 @@ export interface Deal {
   status: "open" | "closed";
   comment?: string | null;
 }
+
+export interface CompareDeal {
+  position_id: number;
+  symbol: string;
+  direction: "buy" | "sell";
+  volume: number;
+  entry_time: string;
+  entry_price: number;
+  exit_time: string | null;
+  exit_price: number | null;
+  profit: number;
+}
+
+export interface CompareDealPair {
+  entry_time: string;
+  symbol: string;
+  deal1: CompareDeal | null;
+  deal2: CompareDeal | null;
+}
+
+export interface CompareSummary {
+  matched: number;
+  account1_only: number;
+  account2_only: number;
+  total_profit1: number;
+  total_profit2: number;
+}
+
+export interface CompareResult {
+  pairs: CompareDealPair[];
+  summary: CompareSummary;
+}

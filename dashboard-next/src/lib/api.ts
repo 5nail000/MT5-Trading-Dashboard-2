@@ -1,4 +1,4 @@
-import { Account, Magic, MagicGroup, OpenPositionsSummary, Deal } from "@/types/dashboard";
+import { Account, Magic, MagicGroup, OpenPositionsSummary, Deal, CompareResult } from "@/types/dashboard";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
@@ -97,6 +97,17 @@ export const api = {
   deals: (accountId: string, from: string, to: string) =>
     apiFetch<Deal[]>(
       `/deals?account_id=${accountId}&from_date=${encodeURIComponent(from)}&to_date=${encodeURIComponent(to)}`
+    ),
+  compareDeals: (
+    accountId1: string,
+    accountId2: string,
+    magic: number,
+    from: string,
+    to: string,
+    toleranceSeconds: number = 1
+  ) =>
+    apiFetch<CompareResult>(
+      `/compare-deals?account_id_1=${accountId1}&account_id_2=${accountId2}&magic=${magic}&from_date=${encodeURIComponent(from)}&to_date=${encodeURIComponent(to)}&tolerance_seconds=${toleranceSeconds}`
     ),
   syncOpen: (payload: { account_id?: string; use_active?: boolean }) =>
     apiFetch<SyncResponse>("/sync/open", { method: "POST", body: JSON.stringify(payload) }),

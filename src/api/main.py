@@ -15,6 +15,7 @@ from ..readmodels.dashboard_queries import (
     get_period_aggregates,
     get_open_positions_summary,
     get_deals,
+    get_compared_deals,
 )
 from ..security.ip_filter import IPFilterMiddleware
 from ..services import AccountService, SyncService, GroupService
@@ -289,6 +290,26 @@ def aggregates(account_id: str, from_date: datetime, to_date: datetime):
 def deals(account_id: str, from_date: datetime, to_date: datetime):
     """Get deals for a period."""
     return get_deals(account_id, from_date, to_date)
+
+
+@app.get("/compare-deals")
+def compare_deals(
+    account_id_1: str,
+    account_id_2: str,
+    magic: int,
+    from_date: datetime,
+    to_date: datetime,
+    tolerance_seconds: int = 1
+):
+    """Compare deals between two accounts by matching entry_time."""
+    return get_compared_deals(
+        account_id_1=account_id_1,
+        account_id_2=account_id_2,
+        magic=magic,
+        from_dt=from_date,
+        to_dt=to_date,
+        tolerance_seconds=tolerance_seconds,
+    )
 
 
 # ============== Sync Operations ==============

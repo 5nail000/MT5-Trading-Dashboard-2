@@ -696,6 +696,10 @@ export default function Home() {
     window.open("/create-charts", "_blank");
   };
 
+  const handleCompareClick = () => {
+    window.open("/compare", "_blank");
+  };
+
   const handleSettingsClick = () => {
     setIsSettingsOpen(true);
   };
@@ -905,6 +909,7 @@ export default function Home() {
             onDealsClick={handleDealsClick}
             onBalanceChartClick={handleBalanceChartClick}
             onChartsClick={handleChartsClick}
+            onCompareClick={handleCompareClick}
           />
         </div>
 

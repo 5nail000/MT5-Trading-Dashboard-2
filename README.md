@@ -11,6 +11,7 @@ Personal trading dashboard for MetaTrader 5 with FastAPI backend and Next.js fro
 - **Magic Groups**: Group magics for aggregated statistics
 - **Balance/Equity Charts**: Timeline visualization of account performance
 - **Deals History**: Detailed view of closed positions
+- **Account Comparison**: Compare deals between two accounts by entry time
 - **Chart Editor**: Bulk editing of EA parameters in .chr files
 
 ## Architecture
@@ -147,6 +148,7 @@ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().d
 | GET | /open-positions | Get open positions |
 | GET | /aggregates | Get period aggregates |
 | GET | /deals | Get deals history |
+| GET | /compare-deals | Compare deals between accounts |
 | POST | /sync/open | Sync open positions |
 | POST | /sync/history | Sync deals history |
 | GET | /charts/config | Chart editor configuration |

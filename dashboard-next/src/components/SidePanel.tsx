@@ -14,6 +14,7 @@ interface SidePanelProps {
   onDealsClick: () => void;
   onBalanceChartClick: () => void;
   onChartsClick: () => void;
+  onCompareClick: () => void;
 }
 
 const panelItems = [
@@ -22,6 +23,7 @@ const panelItems = [
   { id: "deals", label: "Deals", icon: "📊", newWindow: true },
   { id: "balance", label: "Balance Chart", icon: "📈", newWindow: true },
   { id: "charts", label: "Create Charts", icon: "⚙️", newWindow: true },
+  { id: "compare", label: "Compare Accounts", icon: "⚖️", newWindow: true },
 ];
 
 export default function SidePanel({
@@ -35,6 +37,7 @@ export default function SidePanel({
   onDealsClick,
   onBalanceChartClick,
   onChartsClick,
+  onCompareClick,
 }: SidePanelProps) {
   const visibleGroups = useMemo(() => {
     const selectedSet = new Set(selectedMagicIds);
@@ -63,6 +66,9 @@ export default function SidePanel({
         break;
       case "charts":
         onChartsClick();
+        break;
+      case "compare":
+        onCompareClick();
         break;
     }
   };
